@@ -8,6 +8,7 @@ import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
+import java.io.Serializable
 import java.util.Date
 
 // 추상메서드를 정의해야 함
@@ -17,7 +18,7 @@ import java.util.Date
 // val은 상수
 // String으로 했는데 왜 Date?
 // 내부적으로 컨버터가 작동해서 String으로 변환해준다? (찾아보는 거 필요)
-data class Post(val id: Int, val title: String, var author: String, val createdAt: Date, var content: String)
+data class Post(val id: Int, val title: String, var author: String, val createdAt: Date, var content: String) : Serializable// java.io
 data class AllPostResponse(val result: List<Post>)
 data class PostResponse(val result: Post)
 data class PostCreateRequest(val title: String, val author: String, val content: String)

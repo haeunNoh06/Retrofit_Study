@@ -2,6 +2,7 @@ package com.example.retrofit_study
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.retrofit_study.api.APIService
 import com.example.retrofit_study.api.AllPostResponse
+import com.example.retrofit_study.api.Post
 import com.example.retrofit_study.api.PostResponse
 import com.example.retrofit_study.api.StringResponse
 import org.w3c.dom.Text
@@ -23,6 +25,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class PostReadActivity : AppCompatActivity() {
     lateinit var apiService : APIService
+    lateinit var post : Post
+    lateinit var deleteBtn : Button
+    lateinit var modifyBtn : Button
     var id : Int = -1
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,22 +38,29 @@ class PostReadActivity : AppCompatActivity() {
         Log.d("mytag", id.toString())
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3000")// 안드에서 지원하는 내 pc(10.0.2.2)에 연결해준다. localhost 사용 안 됨
+            .baseUrl(Config.BASE_URL)// 안드에서 지원하는 내 pc(10.0.2.2)에 연결해준다. localhost 사용 안 됨
             .addConverterFactory(GsonConverterFactory.create())// 필수적으로 들어가는 코드. body-parser의 역할과 동일
             .build()
 
         apiService = retrofit.create(APIService::class.java)// 아까 정의한 APIService 인터페이스를 만듦
         getPost(id)
 
-        var delete_btn = findViewById<Button>(R.id.post_delete_btn)
-        delete_btn.setOnClickListener {
+        deleteBtn = findViewById<Button>(R.id.post_delete_btn)
+        deleteBtn.setOnClickListener {
             deletePost(id)
             finish()
-
             // 왜 this만 사용하면 안 되는가?
             // A. this가 액티비티가 아닌 익명클래스를 가리키기 때문이다. this가 콜백이므로 바깥의 this임을 알려주기 위해서
             Toast.makeText(this@PostReadActivity,"글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+        }
 
+
+        modifyBtn = findViewById<Button>(R.id.post_modify_btn)
+        modifyBtn.setOnClickListener {
+            val intent = Intent(this, PostModifyActivity::class.java)
+            intent.putExtra("post", post)
+            finish()
+            startActivity(intent)
         }
     }
 
@@ -65,6 +77,7 @@ class PostReadActivity : AppCompatActivity() {
                 if ( response.isSuccessful) {
                     val data : PostResponse? = response.body()
                     data?.let {
+                        post = it.result
                         findViewById<TextView>(R.id.post_title).text = "제목: "+it.result.title
                         findViewById<TextView>(R.id.post_author).text = "글쓴이: "+it.result.author
                         findViewById<TextView>(R.id.post_content).text = "내용: "+it.result.content
